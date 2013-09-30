@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+require 'time'
+
+loop do
+  url = "/#{%w(users products photos).sample}/#{rand(1000)}"
+  time = Time.now.iso8601
+  rtime = rand(1_000_000)
+  status = [200, 302].sample
+  puts [status, time, rtime, url].join("\t")
+  $stdout.flush
+  sleep rand(10).to_f / 100.0
+end
