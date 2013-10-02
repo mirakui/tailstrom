@@ -8,7 +8,7 @@ module Tailstrom
     def print_row(*cols)
       cols.each_with_index do |col, i|
         col_schema = @schema[i]
-        num_str = num_with_delim col
+        num_str = col ? num_with_delim(col) : '-'
         print ' ' if i > 0
         printf "%#{col_schema[:width]}s", num_str
       end
