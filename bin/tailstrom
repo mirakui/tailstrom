@@ -1,14 +1,6 @@
 #!/usr/bin/env ruby
 $: << File.expand_path('../../lib', __FILE__)
 
-command = ARGV.shift
-
-case command
-when 'stat'
-  require 'tailstrom/command/stat'
-  cmd = Tailstrom::Command::Stat.new(ARGV)
-  cmd.run
-else
-  $stderr.puts "#{$0} <command>"
-  exit 1
-end
+require 'tailstrom/command/stat'
+cmd = Tailstrom::Command::Stat.new(ARGV)
+cmd.run

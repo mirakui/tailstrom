@@ -14,7 +14,7 @@ module Tailstrom
 
     def avg
       return nil if @values.empty?
-      sum.to_f / @values.length
+      sum / @values.length
     end
 
     def sum

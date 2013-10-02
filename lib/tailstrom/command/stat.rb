@@ -1,13 +1,21 @@
 require 'optparse'
 require 'tailstrom/counter_collection'
+require 'tailstrom/table'
 require 'thread'
 
 module Tailstrom
   module Command
     class Stat
+      SCHEMA = [
+        { :name => 'min', :width => 15 },
+        { :name => 'max', :width => 15 },
+        { :name => 'avg', :width => 15 }
+      ]
+
       def initialize(argv)
         @infile = $stdin
         @counters = CounterCollection.new
+        @table = Table.new SCHEMA
         parse_option argv
       end
 
@@ -21,26 +29,35 @@ module Tailstrom
             sleep 0.1
           end
         }
+
+        @table.print_header
+
         loop do
-          puts @counters[:all].avg unless @counters.empty?
+          unless @counters.empty?
+            c = @counters[:all]
+            @table.print_row c.min, c.max, c.avg
+          end
           @counters.clear
-          sleep 1
+          sleep @options[:interval]
         end
       end
 
       def parse_line(line)
         columns = line.split @options[:delimiter]
-        value = columns[@options[:field]].to_f if @options[:field]
+        value = @options[:field] ? columns[@options[:field]] : line
+        value = value =~ /\./ ? value.to_f : value.to_i
         @counters[:all] << value
       end
 
       def parse_option(argv)
         @options = {
-          :delimiter => "\t"
+          :delimiter => "\t",
+          :interval => 1
         }
         opt = OptionParser.new(argv)
-        opt.on('-f [field]', Integer) {|v| @options[:field] = v }
+        opt.on('-f [field]', Integer) {|v| @options[:field] = v - 1 }
         opt.on('-d [delimiter]', String) {|v| @options[:delimiter] = v }
+        opt.on('-i [interval]', Integer) {|v| @options[:interval] = v }
         opt.parse!
       end
     end
