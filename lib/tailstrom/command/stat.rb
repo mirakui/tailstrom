@@ -40,6 +40,8 @@ module Tailstrom
           @counters.clear
           sleep @options[:interval]
         end
+      rescue Interrupt
+        exit 0
       end
 
       def parse_line(line)
