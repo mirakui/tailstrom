@@ -32,5 +32,9 @@ module Tailstrom
     def med
       @values[@values.length / 2]
     end
+
+    def count
+      @values.count
+    end
   end
 end

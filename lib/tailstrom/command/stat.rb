@@ -7,6 +7,7 @@ module Tailstrom
   module Command
     class Stat
       SCHEMA = [
+        { :name => 'count', :width => 7 },
         { :name => 'min', :width => 15 },
         { :name => 'max', :width => 15 },
         { :name => 'avg', :width => 15 }
@@ -35,7 +36,7 @@ module Tailstrom
         loop do
           unless @counters.empty?
             c = @counters[:all]
-            @table.print_row c.min, c.max, c.avg
+            @table.print_row c.count, c.min, c.max, c.avg
           end
           @counters.clear
           sleep @options[:interval]
