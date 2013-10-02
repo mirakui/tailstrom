@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Tailstrom::VERSION
   spec.authors       = ["Issei Naruta"]
   spec.email         = ["naruta@cookpad.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
+  spec.description   = %q{tailstrom is a utility for "tail -f"} 
+  spec.summary       = %q{A utility for "tail -f"}
   spec.homepage      = ""
   spec.license       = "MIT"
 
@@ -17,7 +17,4 @@ Gem::Specification.new do |spec|
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
-
-  spec.add_development_dependency "bundler", "~> 1.3"
-  spec.add_development_dependency "rake"
 end
