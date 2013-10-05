@@ -22,12 +22,9 @@ module Tailstrom
 
       def run
         Thread.start {
-          loop do
-            while line = @infile.gets
-              line = line.chomp
-              parse_line line
-            end
-            sleep 0.1
+          @infile.each_line do |line|
+            line = line.chomp
+            parse_line line
           end
         }
 
