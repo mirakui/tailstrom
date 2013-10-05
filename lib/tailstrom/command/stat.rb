@@ -1,5 +1,5 @@
 require 'optparse'
-require 'tailstrom/counter_collection'
+require 'tailstrom/counter'
 require 'tailstrom/table'
 require 'thread'
 
@@ -15,7 +15,7 @@ module Tailstrom
 
       def initialize(argv)
         @infile = $stdin
-        @counters = CounterCollection.new
+        @counter = Counter.new
         @table = Table.new SCHEMA
         parse_option argv
       end
@@ -31,11 +31,15 @@ module Tailstrom
         @table.print_header
 
         loop do
-          unless @counters.empty?
-            c = @counters[:all]
-            @table.print_row c.count, c.min, c.max, c.avg
+          if @counter
+            @table.print_row(
+              @counter.count,
+              @counter.min,
+              @counter.max,
+              @counter.avg
+            )
           end
-          @counters.clear
+          @counter.clear
           sleep @options[:interval]
         end
       rescue Interrupt
@@ -46,7 +50,7 @@ module Tailstrom
         columns = line.split @options[:delimiter]
         value = @options[:field] ? columns[@options[:field]] : line
         value = value =~ /\./ ? value.to_f : value.to_i
-        @counters[:all] << value
+        @counter << value
       end
 
       def parse_option(argv)
