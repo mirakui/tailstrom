@@ -1,7 +1,6 @@
 require 'optparse'
 require 'tailstrom/counter'
 require 'tailstrom/table'
-require 'thread'
 
 module Tailstrom
   module Command
