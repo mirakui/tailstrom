@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Tailstrom::VERSION
   spec.authors       = ["Issei Naruta"]
   spec.email         = ["naruta@cookpad.com"]
-  spec.description   = %q{tailstrom is a utility for "tail -f"} 
+  spec.description   = %q{tailstrom is an utility for "tail -f"} 
   spec.summary       = %q{A utility for "tail -f"}
   spec.homepage      = ""
   spec.license       = "MIT"
