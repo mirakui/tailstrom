@@ -42,16 +42,7 @@ module Tailstrom
             @table.print_header
           end
 
-          sorted_counters.each do |key, c|
-            key = (key == :nil ? nil : key)
-            next unless out_filter(key, c)
-            if @options[:async]
-              time = Time.now.strftime("%H:%M:%S")
-              @table.print_row time, c.count, c.min, c.max, c.avg, key
-            else
-              @table.print_row c.count, c.min, c.max, c.avg, key
-            end
-          end
+          print_counters
 
           if @counters.size > 1
             @table.puts
@@ -62,6 +53,19 @@ module Tailstrom
         end while !reader.eof?
       rescue Interrupt
         exit 0
+      end
+
+      def print_counters
+        sorted_counters.each do |key, c|
+          key = (key == :nil ? nil : key)
+          next unless out_filter(key, c)
+          if @options[:async]
+            time = Time.now.strftime("%H:%M:%S")
+            @table.print_row time, c.count, c.min, c.max, c.avg, key
+          else
+            @table.print_row c.count, c.min, c.max, c.avg, key
+          end
+        end
       end
 
       def sorted_counters
