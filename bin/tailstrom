@@ -1,52 +1,8 @@
 #!/usr/bin/env ruby
 $: << File.expand_path('../../lib', __FILE__)
-require 'optparse'
+require 'tailstrom/option_parser'
 
-def file_or_string(value)
-  File.exist?(value) ? File.read(value) : value
-end
-
-options = {
-  :delimiter => "\t",
-  :interval => 1,
-  :mode => :stat,
-  :order => :desc
-}
-OptionParser.new(ARGV) {|opt|
-  opt.banner = <<-END
-tail -f access.log | #{$0} [OPTIONS]
-#{$0} [OPTIONS] [file]
-  END
-  opt.on('-f num', Integer, 'value field') {|v| options[:field] = v }
-  opt.on('-k num', Integer, 'key field') {|v| options[:key] = v }
-  opt.on('-d delimiter', String, 'delimiter') {|v| options[:delimiter] = v }
-  opt.on('-i interval', Integer, 'interval for stat mode') {|v| options[:interval] = v }
-  opt.on('-e file_or_string', '--in-filter file_or_string', String, 'input filtering') do |v|
-    options[:in_filter] = file_or_string v
-  end
-  opt.on('--map file_or_string', String, 'input mapping') do |v|
-    options[:map] = file_or_string v
-  end
-  opt.on('--out-filter file_or_string', String, 'output filtering') do |v|
-    options[:out_filter] = file_or_string v
-  end
-  opt.on('--sort file_or_string', String, 'output sorting') do |v|
-    options[:sort] = file_or_string v
-  end
-  opt.on('--order desc|asc', String, 'sorting order (default=desc)') do |v|
-    options[:order] = v.to_s.downcase == 'asc' ? :asc : :desc
-  end
-  opt.on('--stat', 'statistics mode (default)') { options[:mode] = :stat }
-  opt.on('--print', 'print line mode') { options[:mode] = :print }
-  opt.on('--version', 'show version') do
-    require 'tailstrom/version'
-    puts Tailstrom::VERSION
-    exit 0
-  end
-}.order!
-if infile = ARGV.shift
-  options[:static_infile] = open(infile, 'r')
-end
+options = Tailstrom::OptionParser.new.parse ARGV
 
 require "tailstrom/command/#{options[:mode]}"
 cls = Tailstrom::Command.const_get options[:mode].to_s.capitalize

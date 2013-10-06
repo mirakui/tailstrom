@@ -40,10 +40,6 @@ module Tailstrom
 
           print_counters
 
-          if @counters.size > 1
-            @table.puts
-          end
-
           @counters.clear
           i = i + 1
         end while !reader.eof?
@@ -62,6 +58,7 @@ module Tailstrom
         end
 
         def print_counters
+          printed_lines = 0
           sorted_counters.each do |key, c|
             key = (key == :nil ? nil : key)
             next unless out_filter(key, c)
@@ -71,7 +68,9 @@ module Tailstrom
             else
               @table.print_row c.count, c.min, c.max, c.avg, key
             end
+            printed_lines += 1
           end
+          @table.puts if printed_lines > 1
         end
 
         def sorted_counters
