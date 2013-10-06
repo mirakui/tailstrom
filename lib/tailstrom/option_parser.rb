@@ -15,6 +15,7 @@ module Tailstrom
     end
 
     def parse(argv)
+      parser = generate_parser
       parser.order! argv
       if infile = argv.shift
         @options[:static_infile] = open(infile, 'r')
@@ -23,14 +24,13 @@ module Tailstrom
       DEFAULTS.merge @options
     end
 
-    def parser
+    def generate_parser
       ::OptionParser.new do |opt|
         opt.banner = <<-END
 tail -f access.log | #{$0} [OPTIONS]
 #{$0} [OPTIONS] [file]
         END
         opt.on('-c file', '--config file', String, 'config file') do |v|
-          require 'tailstrom/config_loader'
           @options_from_file = load_config v
         end
         opt.on('-f num', Integer, 'value field') do |v|
@@ -80,11 +80,12 @@ tail -f access.log | #{$0} [OPTIONS]
       end
 
       def load_config(file)
+        require 'yaml'
         argv = []
         hash = YAML.load File.read(file)
         hash.each do |k, v|
           argv << (k.length > 1 ? "--#{k}" : "-#{k}")
-          argv << (v unless v.is_a? TrueClass)
+          argv << v unless v.is_a? TrueClass
         end
         parser = Tailstrom::OptionParser.new
         parser.parse argv
