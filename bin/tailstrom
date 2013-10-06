@@ -1,6 +1,21 @@
 #!/usr/bin/env ruby
-$: << File.expand_path('../../lib', __FILE__)
+require 'optparse'
 
+options = {
+  :delimiter => "\t",
+  :interval => 1
+}
+OptionParser.new(ARGV) {|opt|
+  opt.banner = "#{$0} <OPTIONS>"
+  opt.on('-f [field]', Integer) {|v| options[:field] = v - 1 }
+  opt.on('-d [delimiter]', String) {|v| options[:delimiter] = v }
+  opt.on('-i [interval]', Integer) {|v| options[:interval] = v }
+  opt.on('-e [filter]', String) {|v| options[:filter] = v }
+  opt.on('--stat', 'statistics mode') { options[:mode] = :stat }
+  opt.on('--print', 'print line mode') { options[:mode] = :print }
+}.parse!
+
+$: << File.expand_path('../../lib', __FILE__)
 require 'tailstrom/command/stat'
-cmd = Tailstrom::Command::Stat.new(ARGV)
+cmd = Tailstrom::Command::Stat.new(options)
 cmd.run
