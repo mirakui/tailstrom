@@ -17,5 +17,9 @@ module Tailstrom
     def empty?
       @counters.empty?
     end
+
+    def each(&block)
+      @counters.each(&block)
+    end
   end
 end

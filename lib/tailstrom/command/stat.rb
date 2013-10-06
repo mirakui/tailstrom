@@ -1,4 +1,4 @@
-require 'tailstrom/counter'
+require 'tailstrom/counter_collection'
 require 'tailstrom/table'
 require 'tailstrom/tail_reader'
 
@@ -6,15 +6,17 @@ module Tailstrom
   module Command
     class Stat
       SCHEMA = [
+        { :name => 'time', :width => 8 },
         { :name => 'count', :width => 7 },
-        { :name => 'min', :width => 15 },
-        { :name => 'max', :width => 15 },
-        { :name => 'avg', :width => 15 }
+        { :name => 'min', :width => 10 },
+        { :name => 'max', :width => 10 },
+        { :name => 'avg', :width => 10 },
+        { :name => 'key', :width => 10, :align => :left }
       ]
 
       def initialize(options)
         @infile = $stdin
-        @counter = Counter.new
+        @counters = CounterCollection.new
         @table = Table.new SCHEMA
         @options = options
       end
@@ -23,23 +25,24 @@ module Tailstrom
         Thread.start do
           reader = TailReader.new @infile, @options
           reader.each_line do |line|
-            @counter << line[:value]
+            key = line[:key] || :all
+            @counters[key] << line[:value]
           end
         end
 
-        @table.print_header
-
+        height = `put lines`.to_i - 4 rescue 10
+        @i = 0
         loop do
-          if @counter
-            @table.print_row(
-              @counter.count,
-              @counter.min,
-              @counter.max,
-              @counter.avg
-            )
-          end
-          @counter.clear
           sleep @options[:interval]
+
+          @table.print_header if (@i = (@i + 1) % height) == 1
+
+          @counters.each do |key, c|
+            key = (key == :all ? nil : key)
+            time = Time.now.strftime("%H:%M:%S")
+            @table.print_row time, c.count, c.min, c.max, c.avg, key
+          end
+          @counters.clear
         end
       rescue Interrupt
         exit 0
