@@ -34,11 +34,11 @@ module Tailstrom
         end
 
         height = `put lines`.to_i - 4 rescue 10
-        @i = 0
+        i = 0
         begin
           sleep @options[:interval]
 
-          if @i % height == 0
+          if i % height == 0
             @table.print_header
           end
 
@@ -49,49 +49,49 @@ module Tailstrom
           end
 
           @counters.clear
-          @i = @i + 1
+          i = i + 1
         end while !reader.eof?
       rescue Interrupt
         exit 0
       end
 
-      def print_counters
-        sorted_counters.each do |key, c|
-          key = (key == :nil ? nil : key)
-          next unless out_filter(key, c)
-          if @options[:async]
-            time = Time.now.strftime("%H:%M:%S")
-            @table.print_row time, c.count, c.min, c.max, c.avg, key
+      private
+        def print_counters
+          sorted_counters.each do |key, c|
+            key = (key == :nil ? nil : key)
+            next unless out_filter(key, c)
+            if @options[:async]
+              time = Time.now.strftime("%H:%M:%S")
+              @table.print_row time, c.count, c.min, c.max, c.avg, key
+            else
+              @table.print_row c.count, c.min, c.max, c.avg, key
+            end
+          end
+        end
+
+        def sorted_counters
+          counters = @counters.to_a
+          if sort = @options[:sort]
+            counters.sort_by! do |key, c|
+              sum, avg, min, max, count =
+                c.sum, c.avg, c.min, c.max, c.count
+              binding.eval sort
+            end
           else
-            @table.print_row c.count, c.min, c.max, c.avg, key
+            counters.sort_by! do |key, c|
+              c.sum
+            end
           end
+          @options[:order] == :asc ? counters : counters.reverse
         end
-      end
 
-      def sorted_counters
-        counters = @counters.to_a
-        if sort = @options[:sort]
-          counters.sort_by! do |key, c|
+        def out_filter(key, counter)
+          if filter = @options[:out_filter]
             sum, avg, min, max, count =
-              c.sum, c.avg, c.min, c.max, c.count
-            binding.eval sort
-          end
-        else
-          counters.sort_by! do |key, c|
-            c.sum
+              counter.sum, counter.avg, counter.min, counter.max, counter.count
+            binding.eval filter
           end
         end
-        @options[:order] == :asc ? counters : counters.reverse
-      end
-
-      def out_filter(key, counter)
-        if filter = @options[:out_filter]
-          sum, avg, min, max, count =
-            counter.sum, counter.avg, counter.min, counter.max, counter.count
-          binding.eval filter
-        end
-      end
-      private :out_filter
     end
   end
 end
