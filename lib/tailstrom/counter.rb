@@ -5,11 +5,17 @@ module Tailstrom
     end
 
     def <<(value)
+      purge_cache
       @values << value
     end
 
     def clear
       @values = []
+      purge_cache
+    end
+
+    def purge_cache
+      @cache = {}
     end
 
     def avg
@@ -18,15 +24,15 @@ module Tailstrom
     end
 
     def sum
-      @values.inject(0, :+)
+      @cache[:sum] ||= @values.inject(0, :+)
     end
 
     def min
-      @values.min
+      @cache[:min] ||= @values.min
     end
 
     def max
-      @values.max
+      @cache[:max] ||= @values.max
     end
 
     def med
@@ -34,7 +40,7 @@ module Tailstrom
     end
 
     def count
-      @values.count
+      @cache[:count] ||= @values.count
     end
   end
 end

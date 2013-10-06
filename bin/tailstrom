@@ -1,10 +1,15 @@
 #!/usr/bin/env ruby
 require 'optparse'
 
+def file_or_string(value)
+  File.exist?(value) ? File.read(value) : value
+end
+
 options = {
   :delimiter => "\t",
   :interval => 1,
-  :mode => :stat
+  :mode => :stat,
+  :order => :desc
 }
 OptionParser.new(ARGV) {|opt|
   opt.banner = <<-END
@@ -13,10 +18,23 @@ tail -f access.log | #{$0} [OPTIONS]
   END
   opt.on('-f num', Integer, 'value field') {|v| options[:field] = v }
   opt.on('-k num', Integer, 'key field') {|v| options[:key] = v }
-  opt.on('-d delimiter', String) {|v| options[:delimiter] = v }
+  opt.on('-d delimiter', String, 'delimiter') {|v| options[:delimiter] = v }
   opt.on('-i interval', Integer, 'interval for stat mode') {|v| options[:interval] = v }
-  opt.on('-e filter', String) {|v| options[:filter] = v }
-  opt.on('--map file', String, 'mapping file') {|v| options[:map] = File.read(v) }
+  opt.on('-e file_or_string', '--in-filter file_or_string', String, 'input filtering') do |v|
+    options[:in_filter] = file_or_string v
+  end
+  opt.on('--map file_or_string', String, 'input mapping') do |v|
+    options[:map] = file_or_string v
+  end
+  opt.on('--out-filter file_or_string', String, 'output filtering') do |v|
+    options[:out_filter] = file_or_string v
+  end
+  opt.on('--sort file_or_string', String, 'output sorting') do |v|
+    options[:sort] = file_or_string v
+  end
+  opt.on('--order desc|asc', String, 'sorting order (default=desc)') do |v|
+    options[:order] = v.to_s.downcase == 'asc' ? :asc : :desc
+  end
   opt.on('--stat', 'statistics mode (default)') { options[:mode] = :stat }
   opt.on('--print', 'print line mode') { options[:mode] = :print }
 }.order!

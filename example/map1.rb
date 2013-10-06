@@ -7,4 +7,4 @@ key = case col[3]
       when %r(^/products/)
         'products'
       end
-#filter = 'value > 0'
+#in_filter = 'value > 0'

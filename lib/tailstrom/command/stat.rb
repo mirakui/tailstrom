@@ -42,10 +42,9 @@ module Tailstrom
             @table.print_header
           end
 
-          @counters.to_a.sort_by {|key, c|
-            c.sum
-          }.reverse_each do |key, c|
+          sorted_counters.each do |key, c|
             key = (key == :nil ? nil : key)
+            next unless out_filter(key, c)
             if @options[:async]
               time = Time.now.strftime("%H:%M:%S")
               @table.print_row time, c.count, c.min, c.max, c.avg, key
@@ -64,6 +63,31 @@ module Tailstrom
       rescue Interrupt
         exit 0
       end
+
+      def sorted_counters
+        counters = @counters.to_a
+        if sort = @options[:sort]
+          counters.sort_by! do |key, c|
+            sum, avg, min, max, count =
+              c.sum, c.avg, c.min, c.max, c.count
+            binding.eval sort
+          end
+        else
+          counters.sort_by! do |key, c|
+            c.sum
+          end
+        end
+        @options[:order] == :asc ? counters : counters.reverse
+      end
+
+      def out_filter(key, counter)
+        if filter = @options[:out_filter]
+          sum, avg, min, max, count =
+            counter.sum, counter.avg, counter.min, counter.max, counter.count
+          binding.eval filter
+        end
+      end
+      private :out_filter
     end
   end
 end

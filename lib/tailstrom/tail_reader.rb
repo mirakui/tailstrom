@@ -31,15 +31,15 @@ module Tailstrom
       value = @options[:field] ? col[@options[:field]] : line
       value = format_value value
       key = @options[:key] ? col[@options[:key]] : :nil
-      filter = @options[:filter]
+      in_filter = @options[:in_filter]
 
       if @options[:map]
         binding.eval(@options[:map])
         value = format_value value
       end
 
-      if filter
-        return nil unless binding.eval(filter)
+      if in_filter
+        return nil unless binding.eval(in_filter)
       end
 
       { :line => line, :columns => col, :key => key, :value => value }
