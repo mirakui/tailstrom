@@ -49,6 +49,6 @@ if infile = ARGV.shift
 end
 
 require "tailstrom/command/#{options[:mode]}"
-cls = Module.const_get "Tailstrom::Command::#{options[:mode].capitalize}"
+cls = Tailstrom::Command.const_get options[:mode].to_s.capitalize
 cmd = cls.new options
 cmd.run

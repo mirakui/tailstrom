@@ -29,7 +29,7 @@ module Tailstrom
           @counters[line[:key]] << line[:value]
         end
 
-        height = `put lines`.to_i - 4 rescue 10
+        height = terminal_height
         i = 0
         begin
           sleep @options[:interval]
@@ -52,6 +52,15 @@ module Tailstrom
       end
 
       private
+        def terminal_height
+          system 'which tput 2>&1 >/dev/null'
+          if $? == 0
+            `tput lines`.to_i - 4
+          else
+            10
+          end
+        end
+
         def print_counters
           sorted_counters.each do |key, c|
             key = (key == :nil ? nil : key)
@@ -68,13 +77,13 @@ module Tailstrom
         def sorted_counters
           counters = @counters.to_a
           if sort = @options[:sort]
-            counters.sort_by! do |key, c|
+            counters = counters.sort_by do |key, c|
               sum, avg, min, max, count =
                 c.sum, c.avg, c.min, c.max, c.count
               binding.eval sort
             end
           else
-            counters.sort_by! do |key, c|
+            counters = counters.sort_by do |key, c|
               c.sum
             end
           end
