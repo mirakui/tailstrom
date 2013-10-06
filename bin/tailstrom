@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+$: << File.expand_path('../../lib', __FILE__)
 require 'optparse'
 
 def file_or_string(value)
@@ -37,12 +38,16 @@ tail -f access.log | #{$0} [OPTIONS]
   end
   opt.on('--stat', 'statistics mode (default)') { options[:mode] = :stat }
   opt.on('--print', 'print line mode') { options[:mode] = :print }
+  opt.on('--version', 'show version') do
+    require 'tailstrom/version'
+    puts Tailstrom::VERSION
+    exit 0
+  end
 }.order!
 if infile = ARGV.shift
   options[:static_infile] = open(infile, 'r')
 end
 
-$: << File.expand_path('../../lib', __FILE__)
 require "tailstrom/command/#{options[:mode]}"
 cls = Module.const_get "Tailstrom::Command::#{options[:mode].capitalize}"
 cmd = cls.new options
