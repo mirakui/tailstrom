@@ -13,18 +13,14 @@ module Tailstrom
       end
 
       def schema
-        s = [
+        [
+          ({ :name => 'time', :width => 8 } if @options[:async]),
           { :name => 'count', :width => 7 },
           { :name => 'min', :width => 10 },
           { :name => 'max', :width => 10 },
           { :name => 'avg', :width => 10 },
           { :name => 'key', :width => 10, :align => :left }
-        ]
-        if @options[:async]
-          [ { :name => 'time', :width => 8 } ] + s
-        else
-          s
-        end
+        ].compact
       end
 
       def run
