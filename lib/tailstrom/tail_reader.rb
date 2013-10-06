@@ -5,12 +5,25 @@ module Tailstrom
       @options = options
     end
 
-    def each_line
+    def each_line(&block)
+      if @options[:async]
+        Thread.new { _each_line &block }
+      else
+        _each_line &block
+      end
+    end
+
+    def _each_line
       @infile.each_line do |line|
         line.chomp!
         result = parse_line(line)
         yield result if result
       end
+    end
+    private :_each_line
+
+    def eof?
+      @infile.eof?
     end
 
     def parse_line(line)

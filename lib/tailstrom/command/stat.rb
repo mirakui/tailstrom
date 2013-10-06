@@ -5,34 +5,37 @@ require 'tailstrom/tail_reader'
 module Tailstrom
   module Command
     class Stat
-      SCHEMA = [
-        { :name => 'time', :width => 8 },
-        { :name => 'count', :width => 7 },
-        { :name => 'min', :width => 10 },
-        { :name => 'max', :width => 10 },
-        { :name => 'avg', :width => 10 },
-        { :name => 'key', :width => 10, :align => :left }
-      ]
-
       def initialize(options)
-        @infile = $stdin
+        @infile = options[:static_infile] || $stdin
         @counters = CounterCollection.new
-        @table = Table.new SCHEMA
-        @options = options
+        @options = { :async => !options[:static_infile] }.merge options
+        @table = Table.new schema
+      end
+
+      def schema
+        s = [
+          { :name => 'count', :width => 7 },
+          { :name => 'min', :width => 10 },
+          { :name => 'max', :width => 10 },
+          { :name => 'avg', :width => 10 },
+          { :name => 'key', :width => 10, :align => :left }
+        ]
+        if @options[:async]
+          [ { :name => 'time', :width => 8 } ] + s
+        else
+          s
+        end
       end
 
       def run
-        Thread.start do
-          reader = TailReader.new @infile, @options
-          reader.each_line do |line|
-            @counters[line[:key]] << line[:value]
-          end
-          puts 'EOF'
+        reader = TailReader.new @infile, @options
+        reader.each_line do |line|
+          @counters[line[:key]] << line[:value]
         end
 
         height = `put lines`.to_i - 4 rescue 10
         @i = 0
-        loop do
+        begin
           sleep @options[:interval]
 
           if @i % height == 0
@@ -43,8 +46,12 @@ module Tailstrom
             c.sum
           }.reverse_each do |key, c|
             key = (key == :nil ? nil : key)
-            time = Time.now.strftime("%H:%M:%S")
-            @table.print_row time, c.count, c.min, c.max, c.avg, key
+            if @options[:async]
+              time = Time.now.strftime("%H:%M:%S")
+              @table.print_row time, c.count, c.min, c.max, c.avg, key
+            else
+              @table.print_row c.count, c.min, c.max, c.avg, key
+            end
           end
 
           if @counters.size > 1
@@ -53,7 +60,7 @@ module Tailstrom
 
           @counters.clear
           @i = @i + 1
-        end
+        end while !reader.eof?
       rescue Interrupt
         exit 0
       end

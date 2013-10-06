@@ -8,10 +8,10 @@ module Tailstrom
     def print_row(*cols)
       cols.each_with_index do |col, i|
         col_schema = @schema[i]
-        num_str = col ? num_with_delim(col) : '-'
+        str = format_string col
         print ' ' if i > 0
         align = col_schema[:align].to_s == 'left' ? '-' : nil
-        printf "%#{align}#{col_schema[:width]}s", num_str
+        printf "%#{align}#{col_schema[:width]}s", str
       end
       self.puts
     end
@@ -35,6 +35,17 @@ module Tailstrom
     end
 
     private
+      def format_string(value)
+        case value
+        when Numeric
+          num_with_delim value
+        when nil
+          '-'
+        else
+          value
+        end
+      end
+
       def num_with_delim(num)
         head, tail = num.to_s.split('.')
         head.gsub!(/(\d)(?=(\d\d\d)+(?!\d))/, "\\1,")
