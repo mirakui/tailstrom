@@ -10,7 +10,8 @@ module Tailstrom
         col_schema = @schema[i]
         num_str = col ? num_with_delim(col) : '-'
         print ' ' if i > 0
-        printf "%#{col_schema[:width]}s", num_str
+        align = col_schema[:align].to_s == 'left' ? '-' : nil
+        printf "%#{align}#{col_schema[:width]}s", num_str
       end
       self.puts
     end
@@ -21,11 +22,10 @@ module Tailstrom
         if i > 0
           border += '-'
           head   += ' '
-          #border += '+'
-          #head   += '|'
         end
+        align = col[:align].to_s == 'left' ? '-' : nil
         border += '-' * col[:width]
-        head   += "%#{col[:width]}s" % col[:name]
+        head += "%#{align}#{col[:width]}s" % col[:name]
       end
       self.puts border, head, border
     end
