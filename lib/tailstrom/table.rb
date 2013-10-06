@@ -12,7 +12,7 @@ module Tailstrom
         print ' ' if i > 0
         printf "%#{col_schema[:width]}s", num_str
       end
-      @out.puts
+      self.puts
     end
 
     def print_header
@@ -27,7 +27,11 @@ module Tailstrom
         border += '-' * col[:width]
         head   += "%#{col[:width]}s" % col[:name]
       end
-      @out.puts border, head, border
+      self.puts border, head, border
+    end
+
+    def puts(*args)
+      @out.puts *args
     end
 
     private

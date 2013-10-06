@@ -8,10 +8,12 @@ options = {
 }
 OptionParser.new(ARGV) {|opt|
   opt.banner = "tail -f access.log | #{$0} <OPTIONS>"
-  opt.on('-f [field]', Integer, 'value field') {|v| options[:field] = v - 1 }
+  opt.on('-f [num]', Integer, 'value field') {|v| options[:field] = v }
+  opt.on('-k [num]', Integer, 'key field') {|v| options[:key] = v }
   opt.on('-d [delimiter]', String) {|v| options[:delimiter] = v }
   opt.on('-i [interval]', Integer, 'interval for stat mode') {|v| options[:interval] = v }
   opt.on('-e [filter]', String) {|v| options[:filter] = v }
+  opt.on('--map [file]', String, 'mapping file') {|v| options[:map] = File.read(v) }
   opt.on('--stat', 'statistics mode (default)') { options[:mode] = :stat }
   opt.on('--print', 'print line mode') { options[:mode] = :print }
 }.parse!
