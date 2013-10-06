@@ -86,6 +86,8 @@ module Tailstrom
             sum, avg, min, max, count =
               counter.sum, counter.avg, counter.min, counter.max, counter.count
             binding.eval filter
+          else
+            true
           end
         end
     end
