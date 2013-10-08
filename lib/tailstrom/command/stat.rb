@@ -30,19 +30,30 @@ module Tailstrom
         end
 
         height = terminal_height
-        i = 0
+        printed_lines_sum = printed_lines = 0
         begin
           sleep @options[:interval]
 
-          if i % height == 0
+          # TODO refactoring
+          if printed_lines > 0 && (@counters.size > 1 || @counters.keys != [:nil] && !@counters.empty?)
+            @table.puts
+            printed_lines += 1
+          end
+          printed_lines = 0
+
+          if (printed_lines_sum %= height) == 0
             @table.print_header
           end
 
-          print_counters
+          if @counters.size == 0
+            @counters[:nil].count
+          end
+
+          printed_lines = print_counters
+          printed_lines_sum += printed_lines
 
           @counters.clear
-          i = i + 1
-        end while !reader.eof?
+        end until reader.eof?
       rescue Interrupt
         exit 0
       end
@@ -70,7 +81,7 @@ module Tailstrom
             end
             printed_lines += 1
           end
-          @table.puts if printed_lines > 1
+          printed_lines
         end
 
         def sorted_counters

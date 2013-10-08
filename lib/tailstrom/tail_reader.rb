@@ -14,16 +14,18 @@ module Tailstrom
     end
 
     def _each_line
+      @eof = false
       @infile.each_line do |line|
         line.chomp!
         result = parse_line(line)
         yield result if result
       end
+      @eof = true
     end
     private :_each_line
 
     def eof?
-      @infile.eof?
+      @eof
     end
 
     def parse_line(line)

@@ -29,5 +29,9 @@ module Tailstrom
     def size
       @counters.size
     end
+
+    def keys
+      @counters.keys
+    end
   end
 end
