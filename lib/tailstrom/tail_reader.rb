@@ -35,15 +35,19 @@ module Tailstrom
       key = @options[:key] ? col[@options[:key]] : :nil
       in_filter = @options[:in_filter]
 
+      scripts = []
+
       if @options[:map]
-        binding.eval(@options[:map])
-        value = format_value value
+        scripts << @options[:map]
+        scripts << 'value=format_value(value)'
       end
 
       if in_filter
-        return nil unless binding.eval(in_filter)
+        scripts << in_filter
+        return nil unless eval scripts.join(';')
       end
 
+      eval scripts.join(';')
       { :line => line, :columns => col, :key => key, :value => value }
     end
 
