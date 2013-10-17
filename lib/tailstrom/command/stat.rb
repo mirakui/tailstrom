@@ -34,8 +34,7 @@ module Tailstrom
         begin
           sleep @options[:interval]
 
-          # TODO refactoring
-          if printed_lines > 0 && (@counters.size > 1 || @counters.keys != [:nil] && !@counters.empty?)
+          if printed_lines > 0 && (@multiline ||= @counters.size > 1)
             @table.puts
             printed_lines += 1
           end
