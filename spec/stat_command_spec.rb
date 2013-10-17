@@ -29,6 +29,13 @@ END
     103      1,521    989,278    414,438 photos    
 END
 
+  it { expect(run %!-f2 --key col[3][/[a-z]+/] -e 'key=="products"'!).to eq <<-END }
+---------------------------------------------------
+  count        min        max        avg key       
+---------------------------------------------------
+    104      2,524    995,595    505,832 products  
+END
+
   it { expect(run '-f2 --map key=col[3][/[a-z]+/] --in-filter key=~/products/').to eq <<-END }
 ---------------------------------------------------
   count        min        max        avg key       
