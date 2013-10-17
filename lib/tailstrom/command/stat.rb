@@ -90,7 +90,7 @@ module Tailstrom
             counters = counters.sort_by do |key, c|
               sum, avg, min, max, count =
                 c.sum, c.avg, c.min, c.max, c.count
-              binding.eval sort
+              eval sort
             end
           else
             counters = counters.sort_by do |key, c|
@@ -104,7 +104,7 @@ module Tailstrom
           if filter = @options[:out_filter]
             sum, avg, min, max, count =
               counter.sum, counter.avg, counter.min, counter.max, counter.count
-            binding.eval filter
+            eval filter
           else
             true
           end
