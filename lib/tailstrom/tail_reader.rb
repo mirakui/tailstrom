@@ -30,29 +30,46 @@ module Tailstrom
 
     def parse_line(line)
       col = line.split @options[:delimiter]
-      value = @options[:field] ? col[@options[:field]] : line
-      value = format_value value
-      key = @options[:key] ? col[@options[:key]] : :nil
+      key = value = nil
       in_filter = @options[:in_filter]
 
-      scripts = []
+      _scripts = []
 
       if @options[:map]
-        scripts << @options[:map]
-        scripts << 'value=format_value(value)'
+        _scripts << @options[:map]
+        _scripts << 'value=format_value(value)'
+      end
+
+      if @options[:key]
+        _scripts << index_or_eval('key', 'col', @options[:key])
+      end
+
+      if @options[:value]
+        _scripts << index_or_eval('value', 'col', @options[:value])
+        _scripts << 'value=format_value(value)'
       end
 
       if in_filter
-        scripts << in_filter
-        return nil unless eval scripts.join(';')
+        _scripts << in_filter
+        return nil unless eval _scripts.join(';')
       end
 
-      eval scripts.join(';')
+      eval _scripts.join(';')
       { :line => line, :columns => col, :key => key, :value => value }
     end
 
     def format_value(value)
       value =~ /\./ ? value.to_f : value.to_i
     end
+
+    def index_or_eval(var, col, idx)
+      case idx
+      when Integer
+        "#{var}=col[#{idx}]"
+      when String
+        "#{var}=#{idx}"
+      end
+    end
+    private :index_or_eval
   end
 end

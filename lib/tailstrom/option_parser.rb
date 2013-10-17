@@ -33,11 +33,11 @@ tail -f access.log | #{$0} [OPTIONS]
         opt.on('-c file', '--config file', String, 'config file') do |v|
           @options_from_file = load_config v
         end
-        opt.on('-f num', Integer, 'value field') do |v|
-          @options[:field] = v
+        opt.on('-f num_or_string', '--value num_or_string', String, 'value field') do |v|
+          @options[:value] = num_or_string v
         end
-        opt.on('-k num', Integer, 'key field') do |v|
-          @options[:key] = v
+        opt.on('-k num_or_string', '--key num_or_string', String, 'key field') do |v|
+          @options[:key] = num_or_string v
         end
         opt.on('-d delimiter', String, 'delimiter') do |v|
           @options[:delimiter] = v
@@ -77,6 +77,10 @@ tail -f access.log | #{$0} [OPTIONS]
     private
       def file_or_string(value)
         File.exist?(value) ? File.read(value) : value
+      end
+
+      def num_or_string(value)
+        value =~ /^\d+$/ ? value.to_i : file_or_string(value)
       end
 
       def load_config(file)
